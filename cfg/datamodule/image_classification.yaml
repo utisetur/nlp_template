@@ -1,0 +1,13 @@
+path: /mnt/datasets/thurs/imagenette2-160
+n_folds: 3
+fold_n: 0
+class_name: pipeline.datasets.image_dataset.ImageClassificationDataset
+data_module_name: pipeline.datamodules.datamodule_imagenette.ImagenetteDataModule
+labels_to_ohe: False
+num_workers: 0
+batch_size: 256
+pin_memory: True
+main_image_size: 256
+collate_fn:
+mix_params:
+  alpha: 0.4

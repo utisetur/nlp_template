@@ -1,0 +1,7 @@
+class_name: pipeline.datasets.debug_dataset.DebugDataset
+data_module_name: pipeline.datamodules.datamodule_debug.DebugDataModule
+batch_size: 8
+num_workers: 16
+pin_memory: False
+shuffle: True
+random_seed: 666
