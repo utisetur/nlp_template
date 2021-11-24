@@ -8,7 +8,7 @@ defaults:
   - scheduler: plateau
   - model: simple_model
   - callbacks: callbacks
-  - private: custom
+  - private: comet_api
   - augmentation: basic_augs
   - loss: cross_entropy
   - metric: metric_manager
@@ -18,8 +18,8 @@ defaults:
 
 general:
   logs_folder_name: logs
-  workspace: thurs8
-  project_name: epigenetic-feature-prediction
+  workspace: thurs88
+  project_name: test-project
   device: cuda
   log_code: False
   save_pytorch_model: True
@@ -28,7 +28,7 @@ general:
 
 hydra:
   run:
-    dir: outputs/${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.override_dirname}
+    dir: ../outputs/${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.override_dirname}
   sweep:
-    dir: outputs/${now:%Y-%m-%d_%H-%M-%S}
+    dir: ../outputs/${now:%Y-%m-%d_%H-%M-%S}
     subdir: ${hydra.job.override_dirname}

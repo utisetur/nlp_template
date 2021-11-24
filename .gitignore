@@ -5,7 +5,7 @@ __pycache__/
 
 # private files
 private.yaml
-private/comet.yaml
+private/
 outputs/models/
 data/
 results/
