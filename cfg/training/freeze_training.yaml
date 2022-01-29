@@ -1,0 +1,7 @@
+lr: 2e-7
+metric: ${metric.metric.metric_name}
+mode: "max"
+seed: 666
+#debug: False
+n_classes: 2
+wrapper_name: pipeline.wrappers.ruroberta_cls_head_wrapper.ruRoBERTaFreezeFineTuner

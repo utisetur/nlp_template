@@ -1,0 +1,14 @@
+terra:
+  run_name: "2021-12-24_19-42-55"
+  threshold: 0.6549594402313232
+  dataset_class: pipeline.datasets.terra_dataset.TERRaTestDataset
+  submission_path: /home/nbaranov/projects/personal/sberdev_test/data/TERRa/test.jsonl
+  labels_map: {0: "not_entailment", 1: "entailment"}
+  device:
+russe:
+  run_name: "2021-12-26_18-35-35"
+  threshold: 0.5
+  dataset_class: pipeline.datasets.russe_dataset.RUSSeInferenceDataset
+  submission_path: /home/nbaranov/projects/personal/sberdev_test/data/RUSSE/test.jsonl
+  labels_map: {0: False, 1: True}
+  device:

@@ -1,11 +1,14 @@
 import os
+import sys
+
+path = os.path.join(os.path.dirname(__file__), os.pardir)
+sys.path.append(path)
 import warnings
 from pathlib import Path
 
 import comet_ml
 import hydra
 import pytorch_lightning as pl
-import torch
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -20,16 +23,15 @@ def run(cfg: DictConfig) -> None:
     Run pytorch-lightning model
 
     Args:
-        new_dir:
         cfg: hydra config
 
     """
     set_seed(cfg.training.seed)
     run_name = os.path.basename(os.getcwd())
-
     cfg.callbacks.model_checkpoint.params.dirpath = Path(
         os.getcwd(), cfg.callbacks.model_checkpoint.params.dirpath
     ).as_posix()
+
     callbacks = []
     for callback in cfg.callbacks.other_callbacks:
         if callback.params:
@@ -55,30 +57,37 @@ def run(cfg: DictConfig) -> None:
     )
 
     dm = load_obj(cfg.datamodule.data_module_name)(cfg=cfg)
+    dm.prepare_data()
     dm.setup()
-    model = load_obj(cfg.training.lightning_module_name)(cfg=cfg, tag_to_idx=dm.tag_to_idx)
-    model._vectorizer = dm._vectorizer
-    trainer.fit(model, dm)
+    train_dataloader_size = len(dm.train_dataloader())
 
-    if cfg.general.save_pytorch_model:
-        if cfg.general.save_best:
-            best_path = trainer.checkpoint_callback.best_model_path  # type: ignore
-            # extract file name without folder
-            save_name = os.path.basename(os.path.normpath(best_path))
-            model = model.load_from_checkpoint(best_path, cfg=cfg, tag_to_idx=dm.tag_to_idx, strict=False)
-            model_name = Path(
-                cfg.callbacks.model_checkpoint.params.dirpath, f'best_{save_name}'.replace('.ckpt', '.pth')
-            ).as_posix()
-            torch.save(model.model.state_dict(), model_name)
-        else:
-            os.makedirs('saved_models', exist_ok=True)
-            model_name = 'saved_models/last.pth'
-            torch.save(model.model.state_dict(), model_name)
+    model = load_obj(cfg.training.wrapper_name)(cfg=cfg, train_dataloader_size=train_dataloader_size)
+
+    # Run learning rate finder
+    lr_finder = trainer.tuner.lr_find(
+        model=model,
+        datamodule=dm,
+        min_lr=8e-8,
+        max_lr=10,
+        num_training=500,
+    )
+    # Results
+    res = lr_finder.results
+    print('Loss | lr')
+    print(sorted(zip(res['loss'], res['lr'])))
+
+    # Plot with
+    fig = lr_finder.plot(suggest=True)
+    fig.show()
+
+    # Pick point based on plot, or get suggestion
+    new_lr = lr_finder.suggestion()
+    print('best lr:', new_lr)
 
 
-@hydra.main(config_path='conf', config_name='config_ner')
+@hydra.main(config_path='../cfg', config_name='config')
 def run_model(cfg: DictConfig) -> None:
-    os.makedirs('logs', exist_ok=True)
+    os.makedirs('../logs', exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
     if cfg.general.log_code:
         save_useful_info()
@@ -86,4 +95,8 @@ def run_model(cfg: DictConfig) -> None:
 
 
 if __name__ == '__main__':
+    """
+    Example:
+    python bin/train.py --config-name='config'
+    """
     run_model()

@@ -1,0 +1,17 @@
+terra:
+  run_name: "2022-01-11_13-52-05"  # "2021-12-24_19-42-55"
+  threshold: 0.6246063113212585  # 0.6261261701583862
+  dataset_class: pipeline.datasets.terra_dataset.TERRaTestDataset
+  batch_size: 32
+  labels_map: {0: "not_entailment", 1: "entailment"}
+  mode: test
+  device:
+
+russe:
+  run_name: "2021-12-26_18-35-35"
+  threshold: 0.5
+  dataset_class: pipeline.datasets.russe_dataset.RUSSeTestDataset
+  batch_size: 32
+  labels_map: {0: False, 1: True}
+  mode: test
+  device:

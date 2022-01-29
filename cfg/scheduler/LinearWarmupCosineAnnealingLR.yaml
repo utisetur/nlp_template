@@ -1,0 +1,7 @@
+class_name: pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR
+step: step
+monitor: ${training.metric}
+params:
+  warmup_epochs: 65  # Maximum number of iterations for linear warmup
+  max_epochs: 654  # Maximum number of iterations
+  warmup_start_lr: 0.0  # Learning rate to start the linear warmup. Default: 0.

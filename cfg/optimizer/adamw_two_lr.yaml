@@ -1,0 +1,8 @@
+class_name: torch.optim.AdamW
+params:
+  backbone:
+    lr: ${training.lr}
+    weight_decay: 0.01
+  classifier:
+    lr: ${training.head_lr}
+    weight_decay: 0.01

@@ -1,0 +1,6 @@
+class_name:  pipeline.losses.label_smoothing_loss.LabelSmoothingLoss
+params:
+  smoothing: 0.1
+  use_kl_div: False
+  ignore_index: -100
+  reduce: True

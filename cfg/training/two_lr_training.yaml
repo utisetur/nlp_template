@@ -1,0 +1,8 @@
+lr: 2e-6
+head_lr: 5e-5
+metric: ${metric.metric.metric_name}
+mode: "max"
+seed: 666
+#debug: False
+n_classes: 2
+wrapper_name: pipeline.wrappers.ruroberta_wrapper.ruRoBERTaFineTuner

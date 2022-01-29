@@ -1,0 +1,7 @@
+class_name: transformers.get_polynomial_decay_schedule_with_warmup
+step: step
+monitor: ${training.metric}
+params:
+  num_warmup_steps: 196  # Maximum number of iterations for linear warmup
+  num_training_steps: 981  # Maximum number of iterations
+  power: 2

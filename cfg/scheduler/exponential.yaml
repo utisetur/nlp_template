@@ -2,4 +2,4 @@ class_name: torch.optim.lr_scheduler.ExponentialLR
 step: epoch
 monitor: ${training.metric}
 params:
-  gamma: 0.2
+  gamma: 0.05
