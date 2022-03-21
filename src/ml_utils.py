@@ -1,16 +1,48 @@
-import collections
-import random
-from typing import Any
+from typing import Any, Dict
 
-import numpy as np
+import torch
+from tqdm import tqdm
 
 
-def format_prediction_string(boxes, scores):
-    pred_strings = []
-    for s, b in zip(scores, boxes.astype(int)):
-        pred_strings.append(f'{s:.4f} {b[0]} {b[1]} {b[2] - b[0]} {b[3] - b[1]}')
+def batch2device(batch: Dict, device: torch.device) -> Dict:
+    for key, value in batch.items():
+        batch[key] = value.to(device)
+    return batch
 
-    return ' '.join(pred_strings)
+
+def get_test_scores(model, test_dataloader):
+
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+    torch.set_grad_enabled(False)
+    model.to(device)
+    model.eval()
+
+    test_preds = []
+    test_probs = []
+    with torch.inference_mode():
+        for batch in tqdm(test_dataloader):
+            batch = batch2device(batch, device)
+            logits = model(batch)
+            probs = torch.softmax(logits, dim=1).detach().cpu()
+            y_prob, y_pred = torch.max(probs, dim=1)
+            test_preds.extend(y_pred.numpy())
+            test_probs.extend(probs.numpy())
+    return test_preds, test_probs
+
+
+def make_submission_file(test_dataset, test_preds):
+    """
+    File example:
+    {"idx": 12, "label": "not_entailment"}
+    {"idx": 13, "label": "entailment"}
+    """
+    tag2label = {v: k for k, v in test_dataset.labels_map.items()}
+    submit_file = []
+    for idx in [i[-1] for i in test_dataset.data]:
+        submit_file.append({"idx": idx, "label": tag2label[test_preds[idx]]})
+
+    return submit_file
 
 
 def freeze_until(net: Any, param_name: str = None) -> None:
@@ -29,57 +61,3 @@ def freeze_until(net: Any, param_name: str = None) -> None:
         if name == param_name:
             found_name = True
         params.requires_grad = found_name
-
-
-def stratified_group_k_fold(y, groups, k, seed=None):
-    """
-    Stratify by groups.
-
-    https://www.kaggle.com/jakubwasikowski/stratified-group-k-fold-cross-validation
-    """
-    labels_num = np.max(y) + 1
-    y_counts_per_group = collections.defaultdict(lambda: np.zeros(labels_num))
-    y_distr = collections.Counter()
-    for label, g in zip(y, groups):
-        y_counts_per_group[g][label] += 1
-        y_distr[label] += 1
-
-    y_counts_per_fold = collections.defaultdict(lambda: np.zeros(labels_num))
-    groups_per_fold = collections.defaultdict(set)
-
-    def eval_y_counts_per_fold(y_counts, fold):
-        y_counts_per_fold[fold] += y_counts
-        std_per_label = []
-        for label in range(labels_num):
-            label_std = np.std([y_counts_per_fold[i][label] / y_distr[label] for i in range(k)])
-            std_per_label.append(label_std)
-        y_counts_per_fold[fold] -= y_counts
-        return np.mean(std_per_label)
-
-    groups_and_y_counts = list(y_counts_per_group.items())
-    random.Random(seed).shuffle(groups_and_y_counts)
-
-    for g, y_counts in sorted(groups_and_y_counts, key=lambda x: -np.std(x[1])):
-        best_fold = None
-        min_eval = None
-        for i in range(k):
-            fold_eval = eval_y_counts_per_fold(y_counts, i)
-            if min_eval is None or fold_eval < min_eval:
-                min_eval = fold_eval
-                best_fold = i
-        y_counts_per_fold[best_fold] += y_counts
-        groups_per_fold[best_fold].add(g)
-
-    all_groups = set(groups)
-    for i in range(k):
-        train_groups = all_groups - groups_per_fold[i]
-        test_groups = groups_per_fold[i]
-
-        train_indices = [i for i, g in enumerate(groups) if g in train_groups]
-        test_indices = [i for i, g in enumerate(groups) if g in test_groups]
-
-        yield train_indices, test_indices
-
-
-def collate_fn(batch):
-    return tuple(zip(*batch))

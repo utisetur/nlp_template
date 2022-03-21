@@ -1,0 +1,11 @@
+data_path: '../../data/RTE/'
+class_name: pipeline.datasets.rte_dataset.RTEDataset
+test_class_name: pipeline.datasets.rte_dataset.RTETestDataset
+data_module_name: pipeline.datamodules.superglue_datamodule.SuperGLUEDataModule
+tokenizer: transformers.RobertaTokenizer
+pretrained_tokenizer: roberta-base
+batch_size: 32
+max_length: 150
+pin_memory: Ture
+num_workers: 16
+train_dataloader_size:

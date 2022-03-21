@@ -1,0 +1,7 @@
+class_name: pipeline.models.roberta_classifier.RoBERTaClassifier
+pretrained_model: roberta-base
+checkpoint:
+freeze_params: False
+params:
+  n_classes: 2
+  dropout: 0.25

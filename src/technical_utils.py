@@ -1,14 +1,44 @@
 import collections
 import importlib
+import os
+import random
+import shutil
 from itertools import product
 from typing import Any, Dict, Generator
 
+import hydra
+import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
 from torch import nn
 
 
-def load_obj(obj_path: str, default_obj_path: str = '') -> Any:
+def set_seed(seed: int = 666, precision: int = 10) -> None:
+    np.random.seed(seed)
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.set_printoptions(precision=precision)
+
+
+def save_useful_info() -> None:
+    print(hydra.utils.get_original_cwd())
+    print(os.getcwd())
+    shutil.copytree(
+        os.path.join(hydra.utils.get_original_cwd(), "src"),
+        os.path.join(hydra.utils.get_original_cwd(), f"{os.getcwd()}/code/src"),
+    )
+    shutil.copy2(
+        os.path.join(hydra.utils.get_original_cwd(), "bin/train.py"),
+        os.path.join(hydra.utils.get_original_cwd(), os.getcwd(), "code"),
+    )
+
+
+def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     """
     Extract an object from a given path.
     https://github.com/quantumblacklabs/kedro/blob/9809bd7ca0556531fa4a2fc02d5b2dc26cf8fa97/kedro/utils.py
@@ -20,19 +50,19 @@ def load_obj(obj_path: str, default_obj_path: str = '') -> Any:
         Raises:
             AttributeError: When the object does not have the given named attribute.
     """
-    obj_path_list = obj_path.rsplit('.', 1)
+    obj_path_list = obj_path.rsplit(".", 1)
     obj_path = obj_path_list.pop(0) if len(obj_path_list) > 1 else default_obj_path
     obj_name = obj_path_list[0]
     module_obj = importlib.import_module(obj_path)
     if not hasattr(module_obj, obj_name):
-        raise AttributeError(f'Object `{obj_name}` cannot be loaded from `{obj_path}`.')
+        raise AttributeError(f"Object `{obj_name}` cannot be loaded from `{obj_path}`.")
     return getattr(module_obj, obj_name)
 
 
 def convert_to_jit(model: nn.Module, save_name: str, cfg: DictConfig) -> None:
     input_shape = (1, 3, cfg.datamodule.main_image_size, cfg.datamodule.main_image_size)
     input_shape1 = 1
-    out_path = f'saved_models/{save_name}_jit.pt'
+    out_path = f"saved_models/{save_name}_jit.pt"
     model.eval()
 
     device = next(model.parameters()).device
@@ -65,7 +95,7 @@ def product_dict(**kwargs: Dict) -> Generator:
     vals = kwargs.values()
     for instance in product(*vals):
         zip_list = list(zip(keys, instance))
-        yield [f'{i}={j}' for i, j in zip_list]
+        yield [f"{i}={j}" for i, j in zip_list]
 
 
 def config_to_hydra_dict(cfg: DictConfig) -> Dict:
@@ -84,17 +114,17 @@ def config_to_hydra_dict(cfg: DictConfig) -> Dict:
     experiment_dict = {}
     for k, v in cfg.items():
         for k1, v1 in v.items():
-            experiment_dict[f'{k}.{k1}'] = v1
+            experiment_dict[f"{k}.{k1}"] = v1
 
     return experiment_dict
 
 
-def flatten_omegaconf(d, sep='_'):
+def flatten_omegaconf(d, sep="_"):
     d = OmegaConf.to_container(d)
 
     obj = collections.OrderedDict()
 
-    def recurse(t, parent_key=''):
+    def recurse(t, parent_key=""):
 
         if isinstance(t, list):
             for i, _ in enumerate(t):

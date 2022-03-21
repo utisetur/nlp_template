@@ -1,0 +1,5 @@
+lr: 5e-5
+metric: ${metrics.metric.metric_name}
+mode: "max"
+seed: 666
+trainer_name: pipeline.trainers.roberta_trainer.RoBERTaFineTuner

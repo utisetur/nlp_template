@@ -3,5 +3,5 @@ metric:
   metric_name: accuracy
   params:
     threshold: 0.5
-    num_classes: ${training.n_classes}
-    top_k: 1
+#    num_classes: ${model.params.n_classes}
+#    top_k: 1
