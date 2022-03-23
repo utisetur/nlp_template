@@ -12,7 +12,7 @@ class RoBERTaClassifier(nn.Module):
         self.model = RobertaModel.from_pretrained(cfg.model.pretrained_model)
 
         self.classifier = nn.Sequential(
-            nn.BatchNorm1d(self.model.config.hidden_size),
+            # nn.BatchNorm1d(self.model.config.hidden_size),
             nn.Dropout(p=self.cfg.model.params.dropout),
             nn.Linear(
                 self.model.pooler.dense.weight.shape[0], self.cfg.model.params.n_classes

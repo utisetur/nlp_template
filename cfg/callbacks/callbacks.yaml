@@ -1,11 +1,11 @@
 early_stopping:
   class_name: pytorch_lightning.callbacks.EarlyStopping
   params:
-    monitor: val_loss  # val_${training.metric}
+    monitor: val_${training.metric}  # val_${training.metric} # val_loss
     patience: 3
-    min_delta: 1e-5
+    min_delta: 1e-4
     verbose: True
-    mode: "min"
+    mode: "max"
 
 model_checkpoint:
   class_name: pytorch_lightning.callbacks.ModelCheckpoint

@@ -11,38 +11,48 @@ def batch2device(batch: Dict, device: torch.device) -> Dict:
 
 
 def get_test_scores(model, test_dataloader):
-
+    """
+    File example:
+    {"idx": 12, "label": "not_entailment"}
+    {"idx": 13, "label": "entailment"}
+    """
+    label2tag = test_dataloader.dataset.labels_map
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     torch.set_grad_enabled(False)
     model.to(device)
     model.eval()
 
-    test_preds = []
-    test_probs = []
+    submit_file = []
+    scores = []
     with torch.inference_mode():
         for batch in tqdm(test_dataloader):
+            idx = batch["idx"].numpy()
             batch = batch2device(batch, device)
-            logits = model(batch)
+            logits = model(**batch)
             probs = torch.softmax(logits, dim=1).detach().cpu()
             y_prob, y_pred = torch.max(probs, dim=1)
-            test_preds.extend(y_pred.numpy())
-            test_probs.extend(probs.numpy())
-    return test_preds, test_probs
+            y_pred = y_pred.numpy()
+            scores.extend(list(zip(idx, y_pred)))
 
-
-def make_submission_file(test_dataset, test_preds):
-    """
-    File example:
-    {"idx": 12, "label": "not_entailment"}
-    {"idx": 13, "label": "entailment"}
-    """
-    tag2label = {v: k for k, v in test_dataset.labels_map.items()}
-    submit_file = []
-    for idx in [i[-1] for i in test_dataset.data]:
-        submit_file.append({"idx": idx, "label": tag2label[test_preds[idx]]})
+    for s in scores:
+        submit_file.append({"idx": int(s[0]), "label": str(label2tag[s[1]])})
 
     return submit_file
+
+
+# def make_submission_file(test_dataset, test_preds):
+#     """
+#     File example:
+#     {"idx": 12, "label": "not_entailment"}
+#     {"idx": 13, "label": "entailment"}
+#     """
+#     tag2label = {v: k for k, v in test_dataset.labels_map.items()}
+#     submit_file = []
+#     for idx in [i[-1] for i in test_dataset.data]:
+#         submit_file.append({"idx": idx, "label": tag2label[test_preds[idx]]})
+#
+#     return submit_file
 
 
 def freeze_until(net: Any, param_name: str = None) -> None:

@@ -80,7 +80,7 @@ class RoBERTaFineTuner(pl.LightningModule):
             )
         else:
             scheduler = load_obj(self.cfg.scheduler.class_name)(
-                optimizer,
+                optimizer, **self.cfg.scheduler.params
             )
 
         return (
@@ -135,22 +135,22 @@ class RoBERTaFineTuner(pl.LightningModule):
                 logger=True,
             )
 
-    def test_step(self, batch, batch_idx):
-        labels = batch["labels"]
-        logits = self(batch)
-        loss = self.criterion(logits, labels)
-        self.log(
-            "test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True
-        )
-
-        probs = torch.softmax(logits, dim=1)
-        for metric_name, metric in self.metrics.items():
-            score = metric(probs, labels)
-            self.log(
-                f"test_{metric_name}",
-                score,
-                on_step=False,
-                on_epoch=True,
-                prog_bar=True,
-                logger=True,
-            )
+    # def test_step(self, batch, batch_idx):
+    #     labels = batch["labels"]
+    #     logits = self(batch)
+    #     loss = self.criterion(logits, labels)
+    #     self.log(
+    #         "test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True
+    #     )
+    #
+    #     probs = torch.softmax(logits, dim=1)
+    #     for metric_name, metric in self.metrics.items():
+    #         score = metric(probs, labels)
+    #         self.log(
+    #             f"test_{metric_name}",
+    #             score,
+    #             on_step=False,
+    #             on_epoch=True,
+    #             prog_bar=True,
+    #             logger=True,
+    #         )

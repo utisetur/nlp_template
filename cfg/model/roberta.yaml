@@ -4,4 +4,4 @@ checkpoint:
 freeze_params: False
 params:
   n_classes: 2
-  dropout: 0.25
+  dropout: 0.5

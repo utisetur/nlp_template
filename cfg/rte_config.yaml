@@ -5,7 +5,7 @@ defaults:
   - training: roberta_training
   - logging: comet_ml
   - optimizer: adamw
-  - scheduler: linear_schedule_with_warmup
+  - scheduler: PolynomialWarmupLR  # PolynomialWarmupLR  # linear_schedule_with_warmup
   - model: roberta
   - callbacks: callbacks
   - private: comet_api

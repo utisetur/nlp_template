@@ -1,9 +1,9 @@
 from typing import Dict, List
 
-import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizer
+import datasets
 
 
 class RTEDataset(Dataset):
@@ -12,26 +12,26 @@ class RTEDataset(Dataset):
     """
 
     def __init__(
-        self, data: List, max_length: int, tokenizer: PreTrainedTokenizer, **kwarg: Dict
+        self, data: datasets.arrow_dataset.Dataset, max_length: int, tokenizer: PreTrainedTokenizer, **kwarg: Dict
     ):
         self.data = data
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.labels_map = {
-            "not_entailment": 0,
-            "entailment": 1,
+            0: "not_entailment",
+            1: "entailment",
         }
 
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, idx: int) -> Dict[str, Tensor]:
-        sentence1, sentence2, label = self.data[idx]
-        label = self.labels_map[label]
+        sample = self.data[idx]
+        label = sample['label']
 
         encoding = self.tokenizer.encode_plus(
-            sentence1,
-            sentence2,
+            sample['premise'],
+            sample['hypothesis'],
             padding=False,
             truncation=True,
             max_length=self.max_length,
@@ -48,32 +48,5 @@ class RTEDataset(Dataset):
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "label": label,
-        }
-
-
-class RTETestDataset(RTEDataset):
-    """
-    Custom PyTorch RTE test dataset class
-    """
-
-    def __getitem__(self, idx: int) -> Dict[str, Tensor]:
-        # we need idx to make submission
-        sentence1, sentence2, idx = self.data[idx]
-
-        encoding = self.tokenizer.encode_plus(
-            sentence1,
-            sentence2,
-            add_special_tokens=True,
-            return_attention_mask=True,
-            return_tensors="pt",
-        )
-        input_ids, attention_mask = (
-            encoding.input_ids.squeeze(),
-            encoding.attention_mask.squeeze(),
-        )
-
-        return {
-            "idx": idx,
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
+            "idx": sample['idx'],
         }

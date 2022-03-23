@@ -1,4 +1,6 @@
 class_name: torch.optim.AdamW
 params:
   lr: ${training.lr}
-  weight_decay: 0.01
+  weight_decay: 0.1
+  eps: 1e-08
+

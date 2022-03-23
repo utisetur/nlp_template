@@ -2,9 +2,10 @@ class_name: transformers.get_linear_schedule_with_warmup
 step: step
 monitor: ${training.metric}
 
+#
 warmup_steps_fraction: 0.1
 
 params:
-  num_warmup_steps:   # The number of steps for the warmup phase.
+  num_warmup_steps: 100  # The number of steps for the warmup phase.
 #  lr_lambda: # 'lambda epoch: 1. / (1. + 0.05 * epoch)'
   num_training_steps:  # The total number of training steps.

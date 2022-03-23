@@ -1,4 +1,4 @@
-lr: 5e-5
+lr: 2e-5
 metric: ${metrics.metric.metric_name}
 mode: "max"
 seed: 666
