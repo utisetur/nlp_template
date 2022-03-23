@@ -1,7 +1,0 @@
-class_name: pipeline.models.ruroberta.ruRoBERTa
-pretrained_model: sberbank-ai/ruRoberta-large
-checkpoint: ${general.checkpoint}
-freeze_params: True
-params:
-  hidden_state: 1024
-  dropout: 0.5

@@ -2,7 +2,7 @@
 name = "pl-template"
 version = "0.1.0"
 description = "General PyTorch Lightning pipeline for NN training"
-authors = ["Thurs88 <nikita.v.baranov@gmail.com>"]
+authors = ["Nikita Baranov <nikita.v.baranov@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

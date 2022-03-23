@@ -12,13 +12,12 @@ import pytorch_lightning as pl
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
-from src.technical_utils import load_obj
-from src.utils import save_useful_info, set_seed
+from src.technical_utils import load_obj, save_useful_info, set_seed
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
-def run(cfg: DictConfig) -> None:
+def learning_rate_search(cfg: DictConfig) -> None:
     """
     Run pytorch-lightning model
 
@@ -43,8 +42,8 @@ def run(cfg: DictConfig) -> None:
     loggers = []
     if cfg.logging.log:
         for logger in cfg.logging.loggers:
-            if 'experiment_name' in logger.params.keys():
-                logger.params['experiment_name'] = run_name
+            if "experiment_name" in logger.params.keys():
+                logger.params["experiment_name"] = run_name
             loggers.append(load_obj(logger.class_name)(**logger.params))
 
     callbacks.append(EarlyStopping(**cfg.callbacks.early_stopping.params))
@@ -61,7 +60,9 @@ def run(cfg: DictConfig) -> None:
     dm.setup()
     train_dataloader_size = len(dm.train_dataloader())
 
-    model = load_obj(cfg.training.wrapper_name)(cfg=cfg, train_dataloader_size=train_dataloader_size)
+    model = load_obj(cfg.training.trainer_name)(
+        cfg=cfg, train_dataloader_size=train_dataloader_size
+    )
 
     # Run learning rate finder
     lr_finder = trainer.tuner.lr_find(
@@ -73,8 +74,8 @@ def run(cfg: DictConfig) -> None:
     )
     # Results
     res = lr_finder.results
-    print('Loss | lr')
-    print(sorted(zip(res['loss'], res['lr'])))
+    print("Loss | lr")
+    print(sorted(zip(res["loss"], res["lr"])))
 
     # Plot with
     fig = lr_finder.plot(suggest=True)
@@ -82,21 +83,21 @@ def run(cfg: DictConfig) -> None:
 
     # Pick point based on plot, or get suggestion
     new_lr = lr_finder.suggestion()
-    print('best lr:', new_lr)
+    print("best lr:", new_lr)
 
 
-@hydra.main(config_path='../cfg', config_name='config')
-def run_model(cfg: DictConfig) -> None:
-    os.makedirs('../logs', exist_ok=True)
+@hydra.main(config_path="../cfg", config_name="rte_config")
+def run_learning_rate_search(cfg: DictConfig) -> None:
+    os.makedirs("../logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
     if cfg.general.log_code:
         save_useful_info()
-    run(cfg)
+    learning_rate_search(cfg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Example:
     python bin/train.py --config-name='config'
     """
-    run_model()
+    run_learning_rate_search()

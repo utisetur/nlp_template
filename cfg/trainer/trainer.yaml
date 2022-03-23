@@ -1,0 +1,18 @@
+gpus: [0]
+#accelerator: ddp
+num_nodes: 1
+accumulate_grad_batches: 2
+profiler: False
+
+max_epochs: 8
+log_every_n_steps: 20
+num_sanity_val_steps: 0
+gradient_clip_val: 1.0
+gradient_clip_algorithm: "value"
+weights_summary: top
+auto_scale_batch_size: False
+precision: 16
+
+# debug mode
+#limit_train_batches: 0.1
+#limit_val_batches: 0.2
