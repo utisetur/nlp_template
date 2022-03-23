@@ -1,10 +1,19 @@
 import random
+
 from torch.utils.data import DataLoader
 
 
 class MultitaskDataLoader(DataLoader):
-
-    def __init__(self, task_names, datasets, batch_size, num_workers, pin_memory, collate_fn, shuffle):
+    def __init__(
+        self,
+        task_names,
+        datasets,
+        batch_size,
+        num_workers,
+        pin_memory,
+        collate_fn,
+        shuffle,
+    ):
         self.task_names = task_names
         self.datasets = datasets
         self.batch_size = batch_size

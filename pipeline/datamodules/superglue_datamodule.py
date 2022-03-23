@@ -28,9 +28,9 @@ class SuperGLUEDataModule(pl.LightningDataModule):
     def prepare_data(self):
         # load datasets
         self.dataset = load_dataset(
-            'super_glue', 
+            "super_glue",
             self.cfg.datamodule.task_name.lower(),
-            cache_dir=self.cfg.datamodule.data_path
+            cache_dir=self.cfg.datamodule.data_path,
         )
 
     def setup(self, stage=None):
@@ -39,12 +39,12 @@ class SuperGLUEDataModule(pl.LightningDataModule):
             dataset_class = load_obj(self.cfg.datamodule.class_name)
 
             self.train_dataset = dataset_class(
-                data=self.dataset['train'],
+                data=self.dataset["train"],
                 max_length=self.cfg.datamodule.max_length,
                 tokenizer=self.tokenizer,
             )
             self.val_dataset = dataset_class(
-                data=self.dataset['validation'],
+                data=self.dataset["validation"],
                 max_length=self.cfg.datamodule.max_length,
                 tokenizer=self.tokenizer,
             )
@@ -52,7 +52,7 @@ class SuperGLUEDataModule(pl.LightningDataModule):
         if stage == "test" or stage is None:
             dataset_class = load_obj(self.cfg.datamodule.class_name)
             self.test_dataset = dataset_class(
-                data=self.dataset['test'],
+                data=self.dataset["test"],
                 max_length=self.cfg.datamodule.max_length,
                 tokenizer=self.tokenizer,
             )

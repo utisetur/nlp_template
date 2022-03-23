@@ -1,8 +1,8 @@
 from typing import Optional
 
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
 class LabelSmoothingLoss(nn.Module):
@@ -22,24 +22,35 @@ class LabelSmoothingLoss(nn.Module):
         self.use_kl_div = use_kl_div
         self.reduce = reduce
 
-    def smooth_one_hot(self, true_labels: torch.Tensor, num_classes: int = 2) -> torch.Tensor:
+    def smooth_one_hot(
+        self, true_labels: torch.Tensor, num_classes: int = 2
+    ) -> torch.Tensor:
 
         confidence = 1.0 - self.smoothing
 
         with torch.no_grad():
-            true_dist = torch.empty(size=(true_labels.size(0), num_classes,), device=true_labels.device,)
+            true_dist = torch.empty(
+                size=(
+                    true_labels.size(0),
+                    num_classes,
+                ),
+                device=true_labels.device,
+            )
             true_dist.fill_(self.smoothing / (num_classes - 1))
             true_dist.scatter_(
-                1, true_labels.data.unsqueeze(1), confidence,
+                1,
+                true_labels.data.unsqueeze(1),
+                confidence,
             )
 
         return true_dist
 
-    def forward(self,
-                logits: torch.Tensor,
-                targets: torch.Tensor,
-                mask: Optional[torch.Tensor] = None
-                ) -> torch.Tensor:
+    def forward(
+        self,
+        logits: torch.Tensor,
+        targets: torch.Tensor,
+        mask: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         """
         :param logits: [batch_size, num_classes]
         :param targets: [batch_size]
@@ -52,15 +63,21 @@ class LabelSmoothingLoss(nn.Module):
         targets_smoothed_dist = self.smooth_one_hot(targets, num_classes=2)
 
         if self.use_kl_div:
-            loss = - F.kl_div(logits, targets_smoothed_dist, reduction="none",).sum(dim=-1)
+            loss = -F.kl_div(
+                logits,
+                targets_smoothed_dist,
+                reduction="none",
+            ).sum(dim=-1)
         else:
-            loss = torch.sum(targets_smoothed_dist * logits, dim=-1,)
+            loss = torch.sum(
+                targets_smoothed_dist * logits,
+                dim=-1,
+            )
 
         if self.reduce:
             loss = loss.mean()
 
         return loss
-
 
 
 # class LabelSmoothingLoss(nn.Module):

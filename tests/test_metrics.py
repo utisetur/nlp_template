@@ -8,7 +8,7 @@ from src.utils.utils import set_seed
 
 
 @torch.no_grad()
-@pytest.mark.parametrize('average', ['micro', 'macro', 'weighted'])
+@pytest.mark.parametrize("average", ["micro", "macro", "weighted"])
 def test_f1score_metric(average: str) -> None:
     set_seed(42)
     labels = torch.randint(1, 10, (4096, 100)).flatten()

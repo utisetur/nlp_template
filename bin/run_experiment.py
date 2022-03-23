@@ -76,15 +76,15 @@ def run(cfg: DictConfig) -> None:
     )
     trainer.fit(model, dm)
 
-    # test_results = get_test_scores(model.model, test_dataloader)
-    #
-    # save_dir = "predicts/"
-    # if not os.path.exists(save_dir):  # type: ignore
-    #     os.makedirs(save_dir, exist_ok=True)
-    #
-    # with open(os.path.join(save_dir, f"{cfg.datamodule.task_name}.jsonl"), "w") as f:
-    #     for item in test_results:
-    #         f.write(json.dumps(item) + "\n")
+    test_results = get_test_scores(model.model, test_dataloader)
+
+    save_dir = "predicts/"
+    if not os.path.exists(save_dir):  # type: ignore
+        os.makedirs(save_dir, exist_ok=True)
+
+    with open(os.path.join(save_dir, f"{cfg.datamodule.task_name}.jsonl"), "w") as f:
+        for item in test_results:
+            f.write(json.dumps(item) + "\n")
 
     if cfg.general.save_pytorch_model and cfg.general.save_best:
         if os.path.exists(trainer.checkpoint_callback.best_model_path):  # type: ignore

@@ -1,9 +1,9 @@
 from typing import Dict, List
 
+import datasets
 from torch import Tensor
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizer
-import datasets
 
 
 class RTEDataset(Dataset):
@@ -12,7 +12,11 @@ class RTEDataset(Dataset):
     """
 
     def __init__(
-        self, data: datasets.arrow_dataset.Dataset, max_length: int, tokenizer: PreTrainedTokenizer, **kwarg: Dict
+        self,
+        data: datasets.arrow_dataset.Dataset,
+        max_length: int,
+        tokenizer: PreTrainedTokenizer,
+        **kwarg: Dict
     ):
         self.data = data
         self.tokenizer = tokenizer
@@ -27,11 +31,11 @@ class RTEDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, Tensor]:
         sample = self.data[idx]
-        label = sample['label']
+        label = sample["label"]
 
         encoding = self.tokenizer.encode_plus(
-            sample['premise'],
-            sample['hypothesis'],
+            sample["premise"],
+            sample["hypothesis"],
             padding=False,
             truncation=True,
             max_length=self.max_length,
@@ -48,5 +52,5 @@ class RTEDataset(Dataset):
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "label": label,
-            "idx": sample['idx'],
+            "idx": sample["idx"],
         }
