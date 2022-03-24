@@ -41,20 +41,6 @@ def get_test_scores(model, test_dataloader):
     return submit_file
 
 
-# def make_submission_file(test_dataset, test_preds):
-#     """
-#     File example:
-#     {"idx": 12, "label": "not_entailment"}
-#     {"idx": 13, "label": "entailment"}
-#     """
-#     tag2label = {v: k for k, v in test_dataset.labels_map.items()}
-#     submit_file = []
-#     for idx in [i[-1] for i in test_dataset.data]:
-#         submit_file.append({"idx": idx, "label": tag2label[test_preds[idx]]})
-#
-#     return submit_file
-
-
 def freeze_until(net: Any, param_name: str = None) -> None:
     """
     Freeze net until param_name

@@ -4,7 +4,7 @@ import pytest
 import torch
 from hydra import compose, initialize
 
-from src.utils.technical_utils import load_obj
+from src.technical_utils import load_obj
 
 
 @pytest.mark.parametrize("opt_name", os.listdir("conf/optimizer"))
